@@ -33,24 +33,10 @@ def get_gemini_response(image_path):
             
         base64_image = base64.b64encode(image_data).decode('utf-8')
         
-        # Dynamic model discovery
-        model_name = "gemini-1.5-flash-latest" # Fallback
-        
-        # Quick check for valid models
-        try:
-             models_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}"
-             m_resp = requests.get(models_url).json()
-             for m in m_resp.get('models', []):
-                 if 'generateContent' in m.get('supportedGenerationMethods', []):
-                     if 'flash' in m['name']: 
-                         model_name = m['name'].replace("models/", "")
-                         break
-                     if 'pro' in m['name']:
-                         model_name = m['name'].replace("models/", "")
-        except:
-            pass
-
+        # Use a stable, specific model version to avoid 'overloaded' errors on experimental/new versions
+        model_name = "gemini-1.5-flash"
         logging.info(f"Using model: {model_name}")
+
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY}"
         headers = {'Content-Type': 'application/json'}
         
@@ -93,11 +79,22 @@ def get_gemini_response(image_path):
             }]
         }
         
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-        if response.status_code != 200:
-            logging.error(f"API Error: {response.text}")
-            return None
-            
+        # Retry logic for 503 errors
+        import time
+        for attempt in range(3):
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            if response.status_code == 200:
+                break
+            elif response.status_code == 503:
+                logging.warning(f"Model overloaded (503). Retrying attempt {attempt+1}/3...")
+                time.sleep(2 * (attempt + 1)) # Exponential backoff
+            else:
+                logging.error(f"API Error: {response.text}")
+                return None
+        else:
+             logging.error("Failed after 3 retries due to overload.")
+             return None
+
         result = response.json()
         if 'candidates' in result and result['candidates']:
             return result['candidates'][0]['content']['parts'][0]['text']
