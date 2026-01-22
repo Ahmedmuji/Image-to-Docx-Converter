@@ -9,13 +9,19 @@ import re
 import subprocess
 import glob
 import logging
+import streamlit as st
 from dotenv import load_dotenv
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY")
+# Try to get key from Streamlit secrets first (for cloud deployment)
+# Fallback to .env (for local development)
+try:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+except Exception:
+    load_dotenv()
+    API_KEY = os.getenv("GEMINI_API_KEY")
 
 def get_gemini_response(image_path):
     """
