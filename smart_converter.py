@@ -109,23 +109,22 @@ def get_gemini_response(image_path):
         logging.error(f"Failed to call API: {e}")
         return None
 
+import sys
+
 def execute_diagram_code(code, unique_id):
     """
     Saves and runs the generated python code to produce an image.
     Returns path to the generated image or None.
     """
-    code_dir = "e:/PPIT/diagram_code"
+    # Use relative path so it works on Cloud (Linux) and Local (Windows)
+    code_dir = "diagram_code"
     os.makedirs(code_dir, exist_ok=True)
     
     script_path = os.path.join(code_dir, f"diag_{unique_id}.py")
     image_output_name = f"diag_img_{unique_id}.png"
-    # We need to modify the code to save to a specific filename we control, or rename 'generated_diagram.png'
-    # Actually, simplest is to let it save to 'generated_diagram.png' then we rename it.
-    # But parallel execution? For now serial is fine.
     
-    # Better: Inspect code and force filename? 
-    # Or just replace 'generated_diagram.png' in the string with our absolute path.
     valid_output_path = os.path.join(code_dir, image_output_name)
+    # Use forward slashes for compatibility in generated code strings
     escaped_path = valid_output_path.replace('\\', '/')
     
     code = code.replace("generated_diagram.png", escaped_path)
@@ -137,7 +136,9 @@ def execute_diagram_code(code, unique_id):
         
     try:
         logging.info(f"Executing diagram script: {script_path}")
-        result = subprocess.run(["python", script_path], capture_output=True, text=True, timeout=30)
+        # Use sys.executable to ensure we use the same python environment (with installed libs)
+        result = subprocess.run([sys.executable, script_path], capture_output=True, text=True, timeout=30)
+        
         if result.returncode == 0 and os.path.exists(valid_output_path):
             logging.info("Diagram generated successfully.")
             return valid_output_path
