@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Must be the first Streamlit command
-st.set_page_config(page_title="Smart OCR Converter", layout="centered")
+st.set_page_config(page_title="Image to Docx converter", layout="centered")
 
 import os
 import tempfile
