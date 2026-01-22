@@ -34,7 +34,7 @@ def get_gemini_response(image_path):
         base64_image = base64.b64encode(image_data).decode('utf-8')
         
         # Use a stable, specific model version to avoid 'overloaded' errors on experimental/new versions
-        model_name = "gemini-1.5-flash"
+        model_name = "gemini-1.5-flash-latest"
         logging.info(f"Using model: {model_name}")
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY}"

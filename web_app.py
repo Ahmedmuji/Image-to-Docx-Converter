@@ -19,7 +19,7 @@ uploaded_file = st.file_uploader("Choose an image (JPG, PNG)", type=["jpg", "jpe
 
 if uploaded_file is not None:
     # Display the image
-    st.image(uploaded_file, caption='Uploaded Image', use_container_width=True)
+    st.image(uploaded_file, caption='Uploaded Image', width="stretch")
     
     if st.button("Convert to Word"):
         with st.spinner("Processing... This may take a minute (Gemini API + Code Generation)..."):
