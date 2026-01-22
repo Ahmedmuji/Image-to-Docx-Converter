@@ -1,4 +1,8 @@
 import streamlit as st
+
+# Must be the first Streamlit command
+st.set_page_config(page_title="Smart OCR Converter", layout="centered")
+
 import os
 import tempfile
 from docx import Document
@@ -7,8 +11,6 @@ import logging
 
 # Configure basic logging
 logging.basicConfig(level=logging.INFO)
-
-st.set_page_config(page_title="Smart OCR Converter", layout="centered")
 
 st.title("Smart GenAI OCR Converter")
 st.write("Upload an image of your notes. The AI will transcribe text and **re-generate diagrams** as digital plots!")
